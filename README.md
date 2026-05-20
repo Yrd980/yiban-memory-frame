@@ -50,19 +50,7 @@
 
 - [docs/core-product-spec.md](docs/core-product-spec.md)
 - [docs/technical-roadmap.md](docs/technical-roadmap.md)
-- [docs/development.md](docs/development.md)
 
 ## 项目状态
 
-当前为产品概念与 MVP 原型开发阶段。
-
-## 本地运行
-
-```bash
-python services/api-server/server.py
-```
-
-访问：
-
-- 老人端：http://localhost:8080/device/
-- 家属端：http://localhost:8080/family/
+当前为产品概念、技术方案和正式工程规划阶段。
