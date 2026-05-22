@@ -16,7 +16,10 @@
             <div id="time" class="time">--:--</div>
             <div id="date" class="date">正在同步</div>
           </div>
-          <div id="status" class="status">相册模式</div>
+          <div class="state-cluster">
+            <span id="statusLight" class="status-light"></span>
+            <div id="status" class="status">相册模式</div>
+          </div>
         </div>
         <div class="caption">
           <div id="photoTitle" class="photo-title">忆伴相册</div>
@@ -24,21 +27,30 @@
         </div>
       </section>
       <aside class="side">
-        <div class="brand">忆伴</div>
+        <div class="brand-block">
+          <div class="brand">忆伴</div>
+          <div class="subtitle">会记得家里故事的相册</div>
+        </div>
         <div id="presence" class="presence">未检测到面对面</div>
-        <button id="presenceBtn">坐到相册前</button>
-        <button id="micBtn">关闭麦克风</button>
-        <div class="panel">
-          <div class="panel-title">家人留言</div>
+        <div class="controls">
+          <button id="presenceBtn">坐到相册前</button>
+          <button id="micBtn">关闭麦克风</button>
+        </div>
+        <div class="panel message-panel">
+          <div class="panel-title">
+            <span>家人留言</span>
+            <span id="messageBadge" class="badge">暂无</span>
+          </div>
           <div id="message" class="message">暂无新留言</div>
         </div>
         <div class="panel conversation-panel">
           <div class="panel-title">面对面陪伴</div>
           <div id="aiReply" class="ai-reply">坐到相册前，可以直接说话。</div>
           <form id="talkForm">
-            <input id="talkInput" autocomplete="off" placeholder="模拟老人语音输入" />
+            <input id="talkInput" autocomplete="off" placeholder="模拟老人说的话" />
             <button type="submit">发送</button>
           </form>
+          <button id="replyBtn" class="reply-button" type="button">回复家人留言</button>
         </div>
       </aside>
     </main>

@@ -3,48 +3,127 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>忆伴家属端</title>
+    <title>忆伴</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header>
-      <div>
-        <h1>忆伴家属端</h1>
-        <p>上传照片、发送留言、查看亲情摘要。</p>
-      </div>
-      <a href="/device/">打开老人端</a>
-    </header>
-    <main>
-      <section>
-        <h2>发送留言</h2>
-        <form id="messageForm">
-          <input name="from" placeholder="称呼，例如 女儿" value="女儿" />
-          <textarea name="content" placeholder="写给老人的留言"></textarea>
-          <button type="submit">发送留言</button>
-        </form>
-      </section>
-      <section>
-        <h2>添加照片</h2>
-        <form id="photoForm">
-          <input name="title" placeholder="照片标题" />
-          <input name="description" placeholder="照片描述" />
-          <input name="people" placeholder="人物，例如 小宝、女儿" />
-          <input name="sceneTags" placeholder="场景，例如 公园、春节" />
-          <textarea name="memoryPrompts" placeholder="回忆引导问题，每行一个"></textarea>
-          <button type="submit">添加照片卡片</button>
-        </form>
-      </section>
-      <section>
-        <div class="section-head">
-          <h2>亲情摘要</h2>
-          <button id="summaryBtn">生成今日摘要</button>
+    <main class="phone-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">妈妈的相册</p>
+          <h1 id="screenTitle">今天的牵挂</h1>
         </div>
-        <div id="summaries" class="list"></div>
-      </section>
-      <section>
-        <h2>最近对话</h2>
-        <div id="conversations" class="list"></div>
-      </section>
+        <div class="header-actions">
+          <button id="resetBtn" class="ghost-button" type="button">重置</button>
+          <a class="device-link" href="/device/" aria-label="打开相册端">相册端</a>
+        </div>
+      </header>
+
+      <div class="screen-stack">
+        <div id="toast" class="toast" hidden></div>
+        <section class="screen active" data-screen="home">
+          <div class="hero-card">
+            <div class="hero-copy">
+              <span id="deviceState" class="state-pill">相册模式</span>
+              <h2 id="heroTitle">等待新的回忆</h2>
+              <p id="heroBody">给妈妈发一张照片或一句话，相册会在合适的时候展示。</p>
+            </div>
+            <div class="hero-photo">
+              <img id="latestPhoto" alt="最新家庭照片" />
+            </div>
+          </div>
+
+          <nav class="quick-actions" aria-label="快捷操作">
+            <button class="action" id="summaryBtn" type="button">
+              <span>生成摘要</span>
+            </button>
+            <button class="action" id="fillReplyBtn" type="button">
+              <span>写一句回应</span>
+            </button>
+          </nav>
+
+          <div class="panel compact-panel">
+            <div class="section-head">
+              <h2>亲情摘要</h2>
+              <span id="summaryCount">0 条</span>
+            </div>
+            <div id="summaries" class="summary-list"></div>
+          </div>
+        </section>
+
+        <section class="screen" data-screen="message">
+          <div class="composer">
+            <form id="messageForm" class="compose-form">
+              <input name="from" value="女儿" aria-label="称呼" />
+              <textarea name="content" placeholder="妈，我看到这张照片也想起小时候了。"></textarea>
+              <button type="submit">发送给相册</button>
+            </form>
+          </div>
+          <div class="panel replies-panel">
+            <div class="section-head">
+              <h2>妈妈回复</h2>
+              <span id="replyCount">0 条</span>
+            </div>
+            <div id="replies" class="summary-list"></div>
+          </div>
+          <div class="hint-card">发送后，相册端会在“家人留言”里提示老人查看。</div>
+        </section>
+
+        <section class="screen" data-screen="photo">
+          <div class="composer">
+            <form id="photoForm" class="compose-form">
+              <label class="photo-picker">
+                <span>选择照片</span>
+                <input id="photoFile" type="file" accept="image/*" />
+              </label>
+              <img id="photoPreview" class="photo-preview" alt="照片预览" hidden />
+              <input name="imageUrl" id="photoImageUrl" type="hidden" />
+              <input name="title" placeholder="照片标题" />
+              <input name="description" placeholder="照片里的事" />
+              <input name="people" placeholder="人物：小宝、妈妈" />
+              <input name="sceneTags" placeholder="场景：公园、春节" />
+              <textarea name="memoryPrompts" placeholder="想让相册接住的话题"></textarea>
+              <button type="submit">添加到相册</button>
+            </form>
+          </div>
+          <div class="panel photo-list-panel">
+            <div class="section-head">
+              <h2>相册照片</h2>
+              <span id="photoCount">0 张</span>
+            </div>
+            <div id="photos" class="photo-list"></div>
+          </div>
+          <div class="hint-card">演示版先添加照片卡片，后续再接真实图片上传。</div>
+        </section>
+
+        <section class="screen" data-screen="conversation">
+          <div class="panel conversation-panel">
+            <div class="section-head">
+              <h2>最近对话</h2>
+              <span id="conversationCount">0 条</span>
+            </div>
+            <div id="conversations" class="conversation-list"></div>
+          </div>
+        </section>
+
+        <section class="screen" data-screen="memory">
+          <div class="panel conversation-panel">
+            <div class="section-head">
+              <h2>家庭记忆</h2>
+              <span id="memoryCount">0 条</span>
+            </div>
+            <div id="memories" class="conversation-list"></div>
+          </div>
+        </section>
+      </div>
+
+      <nav class="bottom-nav" aria-label="功能栏">
+        <button class="nav-item active" data-target="home" type="button">首页</button>
+        <button class="nav-item" data-target="message" type="button">留言</button>
+        <button class="nav-item" data-target="photo" type="button">照片</button>
+        <button class="nav-item" data-target="conversation" type="button">对话</button>
+        <button class="nav-item" data-target="memory" type="button">记忆</button>
+      </nav>
     </main>
     <script src="app.js"></script>
   </body>
