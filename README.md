@@ -52,6 +52,7 @@
 - [docs/technical-roadmap.md](docs/technical-roadmap.md)
 - [docs/mvp-spec.md](docs/mvp-spec.md)
 - [docs/development-plan.md](docs/development-plan.md)
+- [docs/smoke-check.md](docs/smoke-check.md)
 
 ## 项目状态
 
@@ -67,7 +68,11 @@
 -> 子女端查看并回应
 ```
 
+同时保留一套产品级 FastAPI 后端，用于 PostgreSQL + pgvector + Redis + MinIO、Silero VAD、SenseVoice ASR、bge-m3 文本向量和 DeepSeek-V4-Flash 文本摘要/对话的真实能力接入。DeepSeek 在当前 MVP 中不承担视觉能力。
+
 ## 本地运行
+
+### 双端演示版
 
 需要 Node.js。
 
@@ -83,6 +88,26 @@ npm run dev
 ```
 
 演示数据会保存到 `data/demo-state.json`。`data/` 已被 `.gitignore` 忽略。
+
+### 产品级后端
+
+```bash
+docker compose -f deploy/docker-compose.yml up -d
+uv sync
+REDIS_URL=redis://localhost:6380/0 uv run python -m services.api_server
+```
+
+如果要使用 Compose 内的 Redis，请设置 `REDIS_URL=redis://localhost:6380/0`。
+
+访问：
+
+```text
+老人端：http://localhost:8080/device/
+家属端：http://localhost:8080/family/
+API 状态：http://localhost:8080/api/state
+API 健康：http://localhost:8080/api/health
+API 就绪：http://localhost:8080/api/ready
+```
 
 ## 当前已实现
 

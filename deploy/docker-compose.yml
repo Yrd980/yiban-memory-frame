@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: yiban-postgres
+    environment:
+      POSTGRES_DB: yiban_memory_frame
+      POSTGRES_USER: yiban
+      POSTGRES_PASSWORD: yiban
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - yiban_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U yiban -d yiban_memory_frame"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: yiban-redis
+    ports:
+      - "${REDIS_PORT:-6380}:6379"
+    volumes:
+      - yiban_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  minio:
+    image: minio/minio:latest
+    container_name: yiban-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: yiban
+      MINIO_ROOT_PASSWORD: yiban-secret
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - yiban_minio:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  yiban_postgres:
+  yiban_redis:
+  yiban_minio:
