@@ -2,130 +2,152 @@
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
     <title>忆伴</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="phone-shell">
-      <header class="app-header">
-        <div>
-          <p class="eyebrow">妈妈的相册</p>
+    <main class="shell">
+      <header class="header">
+        <div class="header-left">
+          <div class="label">妈妈的相册</div>
           <h1 id="screenTitle">今天的牵挂</h1>
         </div>
-        <div class="header-actions">
-          <button id="resetBtn" class="ghost-button" type="button">重置</button>
-          <a class="device-link" href="/device/" aria-label="打开相册端">相册端</a>
+        <div class="header-right">
+          <button id="resetBtn" class="btn-icon" type="button" title="重置">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 105.64-11.36L3 9"/></svg>
+          </button>
+          <a class="btn-icon" href="/device/" title="相册端">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+          </a>
         </div>
       </header>
 
-      <div class="screen-stack">
+      <div class="content">
         <div id="toast" class="toast" hidden></div>
-        <section class="screen active" data-screen="home">
-          <div class="hero-card">
-            <div class="hero-copy">
-              <span id="deviceState" class="state-pill">相册模式</span>
-              <h2 id="heroTitle">等待新的回忆</h2>
-              <p id="heroBody">给妈妈发一张照片或一句话，相册会在合适的时候展示。</p>
-            </div>
+
+        <section class="view active" data-screen="home">
+          <div class="hero">
             <div class="hero-photo">
               <img id="latestPhoto" alt="最新家庭照片" />
+              <div class="hero-overlay">
+                <span id="deviceState" class="hero-tag">相册模式</span>
+                <h2 id="heroTitle">等待新的回忆</h2>
+                <p id="heroBody">给妈妈发一张照片或一句话。</p>
+              </div>
             </div>
           </div>
-
-          <nav class="quick-actions" aria-label="快捷操作">
-            <button class="action" id="summaryBtn" type="button">
-              <span>生成摘要</span>
+          <div class="actions">
+            <button class="btn-action" id="summaryBtn" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8m2-8H8"/></svg>
+              生成摘要
             </button>
-            <button class="action" id="fillReplyBtn" type="button">
-              <span>写一句回应</span>
+            <button class="btn-action" id="fillReplyBtn" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              写一句回应
             </button>
-          </nav>
-
-          <div class="panel compact-panel">
-            <div class="section-head">
+          </div>
+          <div class="card">
+            <div class="card-head">
               <h2>亲情摘要</h2>
-              <span id="summaryCount">0 条</span>
+              <span id="summaryCount" class="card-count">0 条</span>
             </div>
-            <div id="summaries" class="summary-list"></div>
+            <div id="summaries" class="card-scroll"></div>
           </div>
         </section>
 
-        <section class="screen" data-screen="message">
-          <div class="composer">
-            <form id="messageForm" class="compose-form">
-              <input name="from" value="女儿" aria-label="称呼" />
-              <textarea name="content" placeholder="妈，我看到这张照片也想起小时候了。"></textarea>
-              <button type="submit">发送给相册</button>
-            </form>
-          </div>
-          <div class="panel replies-panel">
-            <div class="section-head">
+        <section class="view" data-screen="message">
+          <form id="messageForm" class="form-stack">
+            <input name="from" value="女儿" class="field" />
+            <textarea name="content" class="textarea" rows="3" placeholder="妈，我看到这张照片也想起小时候了。"></textarea>
+            <button class="btn-submit" type="submit">发送给相册</button>
+          </form>
+          <div class="card">
+            <div class="card-head">
               <h2>妈妈回复</h2>
-              <span id="replyCount">0 条</span>
+              <span id="replyCount" class="card-count">0 条</span>
             </div>
-            <div id="replies" class="summary-list"></div>
+            <div id="replies" class="card-scroll"></div>
           </div>
-          <div class="hint-card">发送后，相册端会在“家人留言”里提示老人查看。</div>
         </section>
 
-        <section class="screen" data-screen="photo">
-          <div class="composer">
-            <form id="photoForm" class="compose-form">
-              <label class="photo-picker">
-                <span>选择照片</span>
-                <input id="photoFile" type="file" accept="image/*" />
-              </label>
-              <img id="photoPreview" class="photo-preview" alt="照片预览" hidden />
-              <input name="imageUrl" id="photoImageUrl" type="hidden" />
-              <input name="title" placeholder="照片标题" />
-              <input name="description" placeholder="照片里的事" />
-              <input name="people" placeholder="人物：小宝、妈妈" />
-              <input name="sceneTags" placeholder="场景：公园、春节" />
-              <textarea name="memoryPrompts" placeholder="想让相册接住的话题"></textarea>
-              <button type="submit">添加到相册</button>
-            </form>
-          </div>
-          <div class="panel photo-list-panel">
-            <div class="section-head">
+        <section class="view" data-screen="photo">
+          <form id="photoForm" class="form-stack">
+            <label class="file-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              <span>选择照片</span>
+              <input id="photoFile" type="file" accept="image/*" />
+            </label>
+            <img id="photoPreview" class="preview" alt="预览" hidden />
+            <input name="imageUrl" id="photoImageUrl" type="hidden" />
+            <div id="aiStatus" class="ai-status" hidden>
+              <div class="ai-spinner"></div>
+              <span>AI 正在分析照片...</span>
+            </div>
+            <details class="meta-details">
+              <summary>手动填写（可选，留空则 AI 自动分析）</summary>
+              <div class="form-row">
+                <input name="title" class="field" placeholder="标题" />
+                <input name="people" class="field" placeholder="人物" />
+              </div>
+              <input name="sceneTags" class="field" placeholder="场景标签" />
+              <textarea name="memoryPrompts" class="textarea" rows="2" placeholder="想让相册接住的话题"></textarea>
+            </details>
+            <button class="btn-submit" type="submit">添加到相册</button>
+          </form>
+          <div class="card">
+            <div class="card-head">
               <h2>相册照片</h2>
-              <span id="photoCount">0 张</span>
+              <span id="photoCount" class="card-count">0 张</span>
             </div>
-            <div id="photos" class="photo-list"></div>
+            <div id="photos" class="card-scroll"></div>
           </div>
-          <div class="hint-card">演示版先添加照片卡片，后续再接真实图片上传。</div>
         </section>
 
-        <section class="screen" data-screen="conversation">
-          <div class="panel conversation-panel">
-            <div class="section-head">
+        <section class="view" data-screen="conversation">
+          <div class="card full">
+            <div class="card-head">
               <h2>最近对话</h2>
-              <span id="conversationCount">0 条</span>
+              <span id="conversationCount" class="card-count">0 条</span>
             </div>
-            <div id="conversations" class="conversation-list"></div>
+            <div id="conversations" class="card-scroll"></div>
           </div>
         </section>
 
-        <section class="screen" data-screen="memory">
-          <div class="panel conversation-panel">
-            <div class="section-head">
+        <section class="view" data-screen="memory">
+          <div class="card full">
+            <div class="card-head">
               <h2>家庭记忆</h2>
-              <span id="memoryCount">0 条</span>
+              <span id="memoryCount" class="card-count">0 条</span>
             </div>
-            <div id="memories" class="conversation-list"></div>
+            <div id="memories" class="card-scroll"></div>
           </div>
         </section>
       </div>
 
-      <nav class="bottom-nav" aria-label="功能栏">
-        <button class="nav-item active" data-target="home" type="button">首页</button>
-        <button class="nav-item" data-target="message" type="button">留言</button>
-        <button class="nav-item" data-target="photo" type="button">照片</button>
-        <button class="nav-item" data-target="conversation" type="button">对话</button>
-        <button class="nav-item" data-target="memory" type="button">记忆</button>
+      <nav class="tabs">
+        <button class="tab active" data-target="home" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10"/></svg>
+          <span>首页</span>
+        </button>
+        <button class="tab" data-target="message" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          <span>留言</span>
+        </button>
+        <button class="tab" data-target="photo" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>照片</span>
+        </button>
+        <button class="tab" data-target="conversation" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+          <span>对话</span>
+        </button>
+        <button class="tab" data-target="memory" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          <span>记忆</span>
+        </button>
       </nav>
     </main>
     <script src="app.js"></script>
   </body>
 </html>
-

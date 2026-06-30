@@ -2,59 +2,78 @@
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
     <title>忆伴相册</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="frame">
-      <section class="photo-stage">
+      <section class="stage">
         <img id="photo" alt="家庭照片" />
-        <div class="shade"></div>
-        <div class="topbar">
+        <div class="vignette"></div>
+        <div class="stage-top">
           <div>
             <div id="time" class="time">--:--</div>
             <div id="date" class="date">正在同步</div>
           </div>
-          <div class="state-cluster">
-            <span id="statusLight" class="status-light"></span>
-            <div id="status" class="status">相册模式</div>
+          <div class="status-chip">
+            <span id="statusLight" class="dot"></span>
+            <span id="status" class="status-text">相册模式</span>
           </div>
         </div>
-        <div class="caption">
+        <div class="stage-bottom">
           <div id="photoTitle" class="photo-title">忆伴相册</div>
           <div id="photoDesc" class="photo-desc">正在准备家庭照片</div>
         </div>
       </section>
-      <aside class="side">
-        <div class="brand-block">
-          <div class="brand">忆伴</div>
-          <div class="subtitle">会记得家里故事的相册</div>
-        </div>
-        <div id="presence" class="presence">未检测到面对面</div>
-        <div class="controls">
-          <button id="presenceBtn">坐到相册前</button>
-          <button id="micBtn">关闭麦克风</button>
-        </div>
-        <div class="panel message-panel">
-          <div class="panel-title">
-            <span>家人留言</span>
-            <span id="messageBadge" class="badge">暂无</span>
+
+      <aside class="panel">
+        <div class="panel-scroll">
+          <div>
+            <div class="brand">忆伴</div>
+            <div class="brand-sub">会记得家里故事的相册</div>
           </div>
-          <div id="message" class="message">暂无新留言</div>
-        </div>
-        <div class="panel conversation-panel">
-          <div class="panel-title">面对面陪伴</div>
-          <div id="aiReply" class="ai-reply">坐到相册前，可以直接说话。</div>
-          <form id="talkForm">
-            <input id="talkInput" autocomplete="off" placeholder="模拟老人说的话" />
-            <button type="submit">发送</button>
-          </form>
-          <button id="replyBtn" class="reply-button" type="button">回复家人留言</button>
+
+          <div id="presence" class="presence-bar">未检测到面对面</div>
+
+          <div class="ctrl-row">
+            <button id="presenceBtn" class="btn-main">坐到相册前</button>
+            <button id="micBtn" class="btn-sub">关闭麦克风</button>
+          </div>
+
+          <div class="msg-card">
+            <div class="msg-head">
+              <span>家人留言</span>
+              <span id="messageBadge" class="badge">暂无</span>
+            </div>
+            <div id="message" class="msg-body">暂无新留言</div>
+          </div>
+
+          <div class="talk-card">
+            <div class="talk-head">面对面陪伴</div>
+            <div id="aiReply" class="ai-text">坐到相册前，可以直接说话。</div>
+            <div id="voiceStatus" class="voice-status" hidden>
+              <div class="voice-wave"></div>
+              <span id="voiceStatusText">正在听...</span>
+            </div>
+            <div class="talk-actions">
+              <button id="talkBtn" class="btn-talk" type="button" disabled>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+                  <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                  <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                </svg>
+                <span id="talkBtnText">按住说话</span>
+              </button>
+              <form id="talkForm" class="talk-form-fallback">
+                <input id="talkInput" class="talk-input" autocomplete="off" placeholder="也可以打字输入" />
+                <button type="submit" class="talk-send">发送</button>
+              </form>
+            </div>
+            <button id="replyBtn" class="btn-reply" type="button">回复家人留言</button>
+          </div>
         </div>
       </aside>
     </main>
     <script src="app.js"></script>
   </body>
 </html>
-

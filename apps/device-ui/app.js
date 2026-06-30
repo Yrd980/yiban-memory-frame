@@ -5,6 +5,11 @@ const state = {
 
 const $ = (id) => document.getElementById(id);
 
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+let voiceSupported = false;
+
 async function api(path, options = {}) {
   const res = await fetch(path, {
     headers: { "Content-Type": "application/json" },
@@ -55,7 +60,7 @@ function render() {
   $("presence").textContent = device.presence ? "已进入面对面陪伴，可以直接说话。" : "未检测到面对面。";
   $("presenceBtn").textContent = device.presence ? "离开相册前" : "坐到相册前";
   $("micBtn").textContent = device.micMuted ? "打开麦克风" : "关闭麦克风";
-  $("micBtn").classList.toggle("secondary", device.micMuted);
+  $("micBtn").classList.toggle("muted", device.micMuted);
   const msg = (state.data.messages || [])[0];
   $("message").textContent = msg ? `${msg.from}：${msg.content}` : "暂无新留言";
   $("messageBadge").textContent = msg ? (msg.heard ? "已读" : "新留言") : "暂无";
@@ -65,10 +70,13 @@ function render() {
   $("talkInput").placeholder = device.micMuted
     ? "麦克风已关"
     : device.presence
-      ? "模拟老人说的话"
+      ? "也可以打字输入"
       : "先坐到相册前";
   $("talkInput").disabled = device.micMuted;
   $("replyBtn").disabled = device.micMuted;
+  if (voiceSupported) {
+    $("talkBtn").disabled = device.micMuted || !device.presence;
+  }
 }
 
 async function togglePresence() {
@@ -84,6 +92,19 @@ async function togglePresence() {
 async function markLatestMessageHeard() {
   const msg = (state.data.messages || [])[0];
   if (!msg || msg.heard) return;
+  try {
+    const res = await fetch("/api/audio/speak", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: `${msg.from}说：${msg.content}` }),
+    });
+    if (res.ok) {
+      const blob = await res.blob();
+      playAudio(URL.createObjectURL(blob));
+    }
+  } catch (err) {
+    console.error("TTS for message failed:", err);
+  }
   const updated = await api(`/api/messages/${msg.id}/heard`, { method: "POST", body: "{}" });
   state.data.messages[0] = updated;
 }
@@ -97,20 +118,101 @@ async function toggleMic() {
   render();
 }
 
-async function submitTalk(event) {
-  event.preventDefault();
-  const input = $("talkInput");
-  const text = input.value.trim();
-  if (!text) return;
+function playAudio(url) {
+  const audio = new Audio(url);
+  audio.play().catch(() => {
+    console.warn("audio autoplay blocked");
+  });
+}
+
+async function initVoice() {
+  if (!window.MediaRecorder) return false;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach((t) => t.stop());
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function startRecording() {
+  if (isRecording) return;
+  if (state.data.device.micMuted || !state.data.device.presence) return;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true },
+    });
+    mediaRecorder = new MediaRecorder(stream, {
+      mimeType: MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : "audio/webm",
+    });
+    audioChunks = [];
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) audioChunks.push(e.data);
+    };
+    mediaRecorder.onstop = () => {
+      stream.getTracks().forEach((t) => t.stop());
+      processRecording();
+    };
+    mediaRecorder.start();
+    isRecording = true;
+    $("talkBtn").classList.add("recording");
+    $("talkBtnText").textContent = "松开发送";
+    $("voiceStatus").hidden = false;
+    $("voiceStatusText").textContent = "正在听...";
+  } catch (err) {
+    $("aiReply").textContent = "无法打开麦克风，请检查权限。";
+  }
+}
+
+function stopRecording() {
+  if (!isRecording || !mediaRecorder) return;
+  mediaRecorder.stop();
+  isRecording = false;
+  $("talkBtn").classList.remove("recording");
+  $("talkBtnText").textContent = "按住说话";
+  $("voiceStatusText").textContent = "正在识别...";
+}
+
+async function processRecording() {
+  if (audioChunks.length === 0) {
+    $("voiceStatus").hidden = true;
+    return;
+  }
+  const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/webm" });
+  audioChunks = [];
+  try {
+    const res = await fetch("/api/audio/transcribe", {
+      method: "POST",
+      headers: { "Content-Type": blob.type },
+      body: blob,
+    });
+    if (!res.ok) throw new Error("识别失败");
+    const { text } = await res.json();
+    if (!text) {
+      $("aiReply").textContent = "没听清，再说一次好吗？";
+      $("voiceStatus").hidden = true;
+      return;
+    }
+    $("voiceStatusText").textContent = `听到：${text}`;
+    await sendConversation(text);
+  } catch (err) {
+    $("aiReply").textContent = err.message || "语音识别出了问题。";
+  }
+  $("voiceStatus").hidden = true;
+}
+
+async function sendConversation(text) {
   if (state.data.device.micMuted) {
-    $("aiReply").textContent = "麦克风已关闭。需要先打开麦克风。";
+    $("aiReply").textContent = "麦克风已关闭。";
     return;
   }
   if (!state.data.device.presence) {
-    $("aiReply").textContent = "请先坐到相册前，进入面对面陪伴。";
+    $("aiReply").textContent = "请先坐到相册前。";
     return;
   }
-  input.value = "";
   const photo = currentPhoto();
   try {
     const result = await api("/api/conversations", {
@@ -120,9 +222,21 @@ async function submitTalk(event) {
     state.data.conversations.push(result.elder, result.ai);
     if (result.device) state.data.device = result.device;
     render();
+    if (result.aiAudioUrl) {
+      playAudio(result.aiAudioUrl);
+    }
   } catch (error) {
     $("aiReply").textContent = error.message;
   }
+}
+
+async function submitTalk(event) {
+  event.preventDefault();
+  const input = $("talkInput");
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = "";
+  await sendConversation(text);
 }
 
 async function submitReply() {
@@ -167,6 +281,13 @@ function rotatePhoto() {
   }
 }
 
+const talkBtn = $("talkBtn");
+talkBtn.addEventListener("mousedown", startRecording);
+talkBtn.addEventListener("mouseup", stopRecording);
+talkBtn.addEventListener("mouseleave", stopRecording);
+talkBtn.addEventListener("touchstart", (e) => { e.preventDefault(); startRecording(); });
+talkBtn.addEventListener("touchend", (e) => { e.preventDefault(); stopRecording(); });
+
 $("presenceBtn").addEventListener("click", togglePresence);
 $("micBtn").addEventListener("click", toggleMic);
 $("talkForm").addEventListener("submit", submitTalk);
@@ -175,5 +296,14 @@ $("replyBtn").addEventListener("click", submitReply);
 setInterval(renderClock, 1000);
 setInterval(rotatePhoto, 9000);
 setInterval(load, 5000);
-load();
+
+initVoice().then((supported) => {
+  voiceSupported = supported;
+  if (!supported) {
+    talkBtn.hidden = true;
+  } else {
+    talkBtn.disabled = true;
+  }
+  load();
+});
 
